@@ -1,0 +1,82 @@
+<!-- index.html -->
+    <!DOCTYPE html>
+    <html lang="en-US">
+    <head>
+		  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css" />
+		  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />      
+          <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
+          <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+		  <script>		  
+				var app = angular.module("countriesDetails", []); 
+				app.controller("myCtrl", function($scope, $http) {
+							$scope.countries = [];
+							$http.get("http://inqstatsapi.inqubu.com/?api_key=b7e63e4f81f7c2ae&cmd=getWorldData&data=population")
+							.success(function(data) {
+								$scope.countries = eval(data);								
+								console.log(data)
+							})
+							.error(function(data) {
+								alert(data);
+								console.log('Error: ' + data);
+							});								
+							
+							$scope.hoverIn = function(event){								
+								var el = $(this);
+								var nextElement = event.currentTarget.nextElementSibling;
+								if(nextElement) {																
+									$(nextElement).show();
+								}
+							  };
+
+							$scope.hoverOut = function(event){
+								var el = $(this);
+								var nextElement = event.currentTarget.nextElementSibling;
+								if(nextElement) {																
+									$(nextElement).hide();
+								}
+							  };													
+						});				
+		  </script>		  
+			<style>
+				#main { margin-left: 40px; padding-left: 0px;}
+				.floatingdiv {float:left;}		
+				.wrapper:after { content: '';
+				display: block;
+				clear: both;}
+				.hiddendiv { display: none; }
+				.boldtext { font-weight:bold;}
+			</style>
+	</head>
+    <body>
+
+        <!-- HEADER AND NAVBAR -->
+        <header>
+            <nav class="navbar navbar-default">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/">AngularJS Example</a>
+                </div>
+
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#"><i class="fa fa-home"></i> Home</a></li>
+                    <li><a href="#about"><i class="fa fa-shield"></i> About</a></li>
+                    <li><a href="#contact"><i class="fa fa-comment"></i> Contact</a></li>
+                </ul>
+            </div>
+            </nav>
+        </header>
+
+        <!-- MAIN CONTENT AND INJECTED VIEWS -->
+        <div id="main" ng-app="countriesDetails" ng-controller="myCtrl">
+			Name: <input ng-model="yourname">
+			<div><p>Welcome {{yourname}}! Click the country name to see its population.</p></div>
+            <ul class="nav">
+				<li class="wrapper" ng-repeat="c in countries">
+					<div class="floatingdiv" ng-mouseover="hoverIn($event)" ng-mouseleave="hoverOut($event)">{{c.countryName}}</div>
+					<div class="floatingdiv boldtext hiddendiv">&nbsp;Population:&nbsp;{{c.population}}</div>
+				</li>
+			</ul>
+        </div>
+
+    </body>
+    </html>
