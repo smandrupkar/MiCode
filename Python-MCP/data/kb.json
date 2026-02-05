@@ -1,0 +1,4 @@
+{
+  "information": "MCP (Model Context Protocol) is a protocol for connecting language models with tools and data.",
+  "features": ["Tool use", "Context passing", "Streaming support"]
+}
