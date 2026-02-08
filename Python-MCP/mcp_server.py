@@ -33,6 +33,16 @@ async def list_tools():
                },
                "required":["prompt"]
            }
+       ),
+       types.Tool(
+           name="ColorPickerHTMLTool",
+           description="Interactive HTML color picker tool. Returns an interactive color picker interface.",
+           inputSchema={
+               "type": "object",
+               "properties":{
+                   "default_color": {"type":"string", "description":"Default color in hex format (e.g., #FF5733)"}
+               }
+           }
        )
    ]
 
@@ -89,6 +99,62 @@ async def call_tool(name, args):
            log(f"Error calling OpenAI endpoint: {e}")
            raise
 
+   if name == "ColorPickerHTMLTool":
+       default_color = args.get("default_color", "#FF5733")
+       
+       html_content = f"""
+       <div style="font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; min-height: 300px; justify-content: center;">
+           <h2 style="color: white; margin: 0;">Interactive Color Picker</h2>
+           
+           <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+               <label for="colorPicker" style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">Select a Color:</label>
+               <div style="display: flex; gap: 15px; align-items: center;">
+                   <input type="color" id="colorPicker" value="{default_color}" style="width: 80px; height: 80px; border: none; cursor: pointer; border-radius: 8px;">
+                   <div style="display: flex; flex-direction: column; gap: 10px;">
+                       <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                           <label style="font-weight: bold; color: #555;">Hex Value:</label>
+                           <input type="text" id="hexValue" value="{default_color}" readonly style="width: 120px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; margin-top: 5px; background: #f5f5f5;">
+                       </div>
+                       <div style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                           <label style="font-weight: bold; color: #555;">RGB Value:</label>
+                           <input type="text" id="rgbValue" value="RGB(255, 87, 51)" readonly style="width: 120px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; margin-top: 5px; background: #f5f5f5;">
+                       </div>
+                   </div>
+               </div>
+           </div>
+           
+           <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); width: 100%; max-width: 300px;">
+               <p style="margin-top: 0; color: #666; font-size: 14px;">Color Preview:</p>
+               <div id="colorPreview" style="width: 100%; height: 120px; background-color: {default_color}; border-radius: 8px; border: 2px solid #ddd; transition: background-color 0.2s ease;"></div>
+               <p style="text-align: center; color: #999; font-size: 12px; margin-bottom: 0;">Color updates in real-time</p>
+           </div>
+       </div>
+       
+       <script>
+           const colorPicker = document.getElementById('colorPicker');
+           const hexValue = document.getElementById('hexValue');
+           const rgbValue = document.getElementById('rgbValue');
+           const colorPreview = document.getElementById('colorPreview');
+           
+           function hexToRgb(hex) {{
+               const r = parseInt(hex.slice(1, 3), 16);
+               const g = parseInt(hex.slice(3, 5), 16);
+               const b = parseInt(hex.slice(5, 7), 16);
+               return `RGB(${{r}}, ${{g}}, ${{b}})`;
+           }}
+           
+           colorPicker.addEventListener('change', function() {{
+               hexValue.value = this.value.toUpperCase();
+               rgbValue.value = hexToRgb(this.value);
+               colorPreview.style.backgroundColor = this.value;
+           }});
+           
+           colorPicker.addEventListener('input', function() {{
+               colorPreview.style.backgroundColor = this.value;
+           }});
+       </script>
+       """
+       return [types.TextContent(type="text", text=html_content)]
    raise ValueError("Unknown tool")
 async def main():
    log("main() started")
